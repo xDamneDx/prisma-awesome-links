@@ -11,8 +11,19 @@ async function main() {
     },
   });
 
+  const user = await prisma.user.findFirst();
+
   await prisma.link.createMany({
-    data: links,
+    data: links.map((link) => ({ ...link, userIds: [user?.id || ""] })),
+  });
+
+  const createdLinks = await prisma.link.findMany();
+
+  await prisma.user.update({
+    where: {
+      email: "test@mail.com",
+    },
+    data: { bookmarkIds: createdLinks.map((link) => link.id) },
   });
 }
 
